@@ -1,0 +1,11 @@
+{
+    "name": "Framework",
+    "references": [
+        "UniRx",
+        "Entitas-Generated"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}
