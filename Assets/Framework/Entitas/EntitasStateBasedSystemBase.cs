@@ -35,7 +35,7 @@ public abstract class EntitasStateBasedSystemBase : StateBasedSystemBase, IExecu
 
         }
 
-        protected override void RequireSwitchState(string transition, UML.EnterEventArg arg = null)
+        protected override void RequireSwitchState(string transition, UML.StateEventArg arg = null)
         {
             var e = new SystemRequireSwitchStateEvent{ transition = transition, eventArg = arg };
             EventRoute.SendEvent(EventSendType.OneTime, e);

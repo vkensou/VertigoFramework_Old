@@ -92,7 +92,7 @@ namespace UML
             autoTransitions.Insert(index, t);
         }
 
-        public void Enter(EnterEventArg arg)
+        public void Enter(StateEventArg arg)
         {
             Assert.IsNotNull(initial);
 
@@ -100,7 +100,7 @@ namespace UML
             rootActive.EnterFromParent(arg);
         }
 
-        public void EnterChild(State child, EnterEventArg arg)
+        public void EnterChild(State child, StateEventArg arg)
         {
             Assert.IsNotNull(child);
             Assert.AreEqual(child.Container, this);
@@ -116,21 +116,21 @@ namespace UML
 
         }
 
-        public void LeaveChild(State child, Region lca)
+        public void LeaveChild(State child, Region lca, StateEventArg arg)
         {
             Assert.IsNotNull(child);
             Assert.AreEqual(child.Container, this);
 
             if (this != lca)
                 if (State != null)
-                    State.LeaveFromChild(lca);
+                    State.LeaveFromChild(lca, arg);
         }
 
-        public void Leave()
+        public void Leave(StateEventArg arg)
         {
             Assert.IsNotNull(rootActive);
 
-            rootActive.LeaveFromParent();
+            rootActive.LeaveFromParent(arg);
             ChangeActiveImpl(null, null, null);
         }
 
@@ -151,7 +151,7 @@ namespace UML
 
                     Assert.AreEqual(this, StateMachine.LCA(t.Source, t.Target));
 
-                    rootActive.LeaveImmediate(this);
+                    rootActive.LeaveImmediate(this, null);
                     t.Effect?.Invoke();
                     ChangeActive(t.Target, t.RootTarget, null);
                     ((State)t.Target).EnterImmediate(null);
@@ -161,7 +161,7 @@ namespace UML
             }
         }
 
-        public bool HandleEvent(string transitionName, EnterEventArg arg)
+        public bool HandleEvent(string transitionName, StateEventArg arg)
         {
             Transition t;
             if (!transitions.TryGetValue(transitionName, out t))
@@ -179,7 +179,7 @@ namespace UML
 
             Assert.AreEqual(this, StateMachine.LCA(t.Source, t.Target));
 
-            rootActive.LeaveImmediate(this);
+            rootActive.LeaveImmediate(this, arg);
             t.Effect?.Invoke();
             ChangeActive(t.Target, t.RootTarget, arg);
             ((State)t.Target).EnterImmediate(arg);
@@ -187,13 +187,13 @@ namespace UML
             return true;
         }
 
-        private void ChangeActive(Vertex v, Vertex rootState, EnterEventArg arg)
+        private void ChangeActive(Vertex v, Vertex rootState, StateEventArg arg)
         {
             if(v is State)
                 ChangeActiveImpl(v as State, rootState as State, arg);
         }
 
-        private void ChangeActiveImpl(State state, State rootState, EnterEventArg arg)
+        private void ChangeActiveImpl(State state, State rootState, StateEventArg arg)
         {
             if (active != null)
                 StateMachine.OnLeaveState(active.Name);

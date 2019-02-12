@@ -25,19 +25,19 @@ namespace UML
             return region;
         }
 
-        internal override void EnterImmediate(EnterEventArg arg)
+        internal override void EnterImmediate(StateEventArg arg)
         {
             base.EnterImmediate(arg);
             EnterChildren(arg);
         }
 
-        internal override void EnterFromParent(EnterEventArg arg)
+        internal override void EnterFromParent(StateEventArg arg)
         {
             base.EnterFromParent(arg);
             EnterChildren(arg);
         }
 
-        internal override void EnterFromChild(Region r, EnterEventArg arg)
+        internal override void EnterFromChild(Region r, StateEventArg arg)
         {
             base.EnterFromChild(r, arg);
             foreach (var region in regions)
@@ -47,7 +47,7 @@ namespace UML
             }
         }
 
-        private void EnterChildren(EnterEventArg arg)
+        private void EnterChildren(StateEventArg arg)
         {
             foreach (var region in regions)
             {
@@ -55,23 +55,23 @@ namespace UML
             }
         }
 
-        internal override void LeaveImmediate(Region lca)
+        internal override void LeaveImmediate(Region lca, StateEventArg arg)
         {
-            LeaveChildren();
-            base.LeaveImmediate(lca);
+            LeaveChildren(arg);
+            base.LeaveImmediate(lca, arg);
         }
 
-        internal override void LeaveFromParent()
+        internal override void LeaveFromParent(StateEventArg arg)
         {
-            LeaveChildren();
-            base.LeaveFromParent();
+            LeaveChildren(arg);
+            base.LeaveFromParent(arg);
         }
 
-        private void LeaveChildren()
+        private void LeaveChildren(StateEventArg arg)
         {
             foreach (var region in regions)
             {
-                region.Value.Leave();
+                region.Value.Leave(arg);
             }
         }
 
@@ -102,7 +102,7 @@ namespace UML
             base.Destroy();
         }
 
-        internal override bool HandleEvent(string transitionName, EnterEventArg arg)
+        internal override bool HandleEvent(string transitionName, StateEventArg arg)
         {
             foreach (var region in regions)
             {

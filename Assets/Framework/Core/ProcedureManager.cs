@@ -8,7 +8,7 @@ public class ProcedureManager : IProcedureManager
 
     private int command;
     private string commandEvent;
-    private UML.EnterEventArg commandArg;
+    private UML.StateEventArg commandArg;
     private bool commandShutDown;
     private UML.StateMachine procedureStateMachine = new UML.StateMachine();
 
@@ -44,7 +44,7 @@ public class ProcedureManager : IProcedureManager
         procedureStateMachine.AddTransition(transitionName, source as UML.State, target as UML.State);
     }
 
-    public override void PushCommand(string procedure, UML.EnterEventArg firearg = null)
+    public override void PushCommand(string procedure, UML.StateEventArg firearg = null)
     {
         if (command == 1)
         {
@@ -57,7 +57,7 @@ public class ProcedureManager : IProcedureManager
         commandShutDown = true;
     }
 
-    public override void PushCommand(string procedure, UML.EnterEventArg firearg, bool shutdown)
+    public override void PushCommand(string procedure, UML.StateEventArg firearg, bool shutdown)
     {
         if (command == 1)
         {

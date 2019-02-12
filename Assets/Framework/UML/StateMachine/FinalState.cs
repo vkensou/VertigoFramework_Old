@@ -14,11 +14,11 @@
 
         }
 
-        protected override void OnEnter(EnterEventArg arg)
+        protected override void OnEnter(StateEventArg arg)
         {
         }
 
-        protected override void OnLeave()
+        protected override void OnLeave(StateEventArg arg)
         {
         }
 

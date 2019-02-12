@@ -32,7 +32,7 @@ public abstract class EntitasSubProcedure : SimpleProcedure
 
     protected virtual StateMachine CreateStateMachine() { return null; }
 
-    protected override void OnEnter(UML.EnterEventArg userData)
+    protected override void OnEnter(UML.StateEventArg userData)
     {
         base.OnEnter(userData);
 
@@ -52,14 +52,14 @@ public abstract class EntitasSubProcedure : SimpleProcedure
 
     protected abstract void CreateSystems(Feature feature);
 
-    protected override void OnLeave()
+    protected override void OnLeave(StateEventArg arg)
     {
         m_systems.TearDown();
 #if (!ENTITAS_DISABLE_VISUAL_DEBUGGING && UNITY_EDITOR)
         Object.Destroy(m_systems.gameObject);
 #endif
         m_systems = null;
-        base.OnLeave();
+        base.OnLeave(arg);
     }
 
     protected override void OnUpdate()
@@ -75,13 +75,16 @@ public abstract class EntitasSubProcedure : SimpleProcedure
         if (m_stateMachine != null)
             e = EventRoute.TakeEvent<SystemRequireSwitchStateEvent>();
 
+        if (m_stateMachine != null)
+            m_stateMachine.Update();
+
         EventRoute.RemoveAll();
 
         if (e != null)
             m_stateMachine.FireEvent(e.transition, e.eventArg);
     }
 
-    protected virtual void OnEnterState(string state, EnterEventArg arg)
+    protected virtual void OnEnterState(string state, StateEventArg arg)
     {
         Debug.LogFormat("Enter {0}", state);
         EventRoute.SendEvent(EventSendType.OneFrame, new SystemSwitchStateEvent { state = state, arg = arg });

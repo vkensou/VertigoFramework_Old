@@ -85,7 +85,7 @@ public class UIManager
         var obb = ResourceBundleManager.SharedInstance.LoadAsset(id);
         obb.Subscribe(result =>
         {
-            if (!uiPrefabs.ContainsKey(result.id))
+            if (result.asset is GameObject && !uiPrefabs.ContainsKey(result.id))
                 uiPrefabs.Add(result.id, result.asset as GameObject);
         });
         return obb;

@@ -12,7 +12,7 @@ namespace UML
         State submachineState;
         public event Action FinalEvent;
         public event Action TerminateEvent;
-        public event Action<string, EnterEventArg> EnterStateEvent;
+        public event Action<string, StateEventArg> EnterStateEvent;
         public event Action<string> LeaveStateEvent;
         public bool IsFinal { get; private set; } = false;
         public bool IsTerminate { get; private set; }
@@ -73,7 +73,7 @@ namespace UML
             }
         }
 
-        public void FireEvent(string transitionName, EnterEventArg arg = null)
+        public void FireEvent(string transitionName, StateEventArg arg = null)
         {
             foreach (var region in regions)
             {
@@ -97,7 +97,7 @@ namespace UML
         public void Destory()
         {
             foreach (var region in regions)
-                region.Value.Leave();
+                region.Value.Leave(null);
             foreach (var region in regions)
                 region.Value.Destroy();
         }
@@ -121,7 +121,7 @@ namespace UML
             TerminateEvent?.Invoke();
         }
 
-        internal void OnEnterState(string state, EnterEventArg arg)
+        internal void OnEnterState(string state, StateEventArg arg)
         {
             EnterStateEvent?.Invoke(state, arg);
         }

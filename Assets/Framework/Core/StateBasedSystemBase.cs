@@ -37,7 +37,7 @@ public abstract class StateBasedSystemBase : SystemBase
             EventRoute = eventRoute;
         }
 
-        public virtual void Enter(UML.EnterEventArg arg) { }
+        public virtual void Enter(UML.StateEventArg arg) { }
         public virtual void Update() { }
         public virtual void Leave() { }
 
@@ -61,6 +61,6 @@ public abstract class StateBasedSystemBase : SystemBase
             return EventRoute.TryTakeEvent<E>(out _event);
         }
 
-        protected abstract void RequireSwitchState(string transition, UML.EnterEventArg arg = null);
+        protected abstract void RequireSwitchState(string transition, UML.StateEventArg arg = null);
     }
 }

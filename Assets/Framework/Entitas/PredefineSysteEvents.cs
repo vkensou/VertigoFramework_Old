@@ -4,11 +4,11 @@ using UML;
 public class SystemSwitchStateEvent : ISystemEvent
 {
     public string state;
-    public EnterEventArg arg;
+    public StateEventArg arg;
 }
 
 public class SystemRequireSwitchStateEvent : ISystemEvent
 {
     public string transition;
-    public EnterEventArg eventArg;
+    public StateEventArg eventArg;
 }

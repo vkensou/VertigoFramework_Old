@@ -9,7 +9,7 @@ namespace UML
         Submachine
     }
 
-    public class EnterEventArg
+    public class StateEventArg
     {
 
     }
@@ -18,8 +18,8 @@ namespace UML
     {
         public StateKind Kind { get; }
 
-        public event Action<EnterEventArg> EntryEvent;
-        public event Action ExitEvent;
+        public event Action<StateEventArg> EntryEvent;
+        public event Action<StateEventArg> ExitEvent;
         public event Action UpdateEvent;
         public event Action InitialEvent;
         public event Action DestroyEvent;
@@ -37,14 +37,14 @@ namespace UML
             return null;
         }
 
-        protected virtual void OnEnter(EnterEventArg arg)
+        protected virtual void OnEnter(StateEventArg arg)
         {
             EntryEvent?.Invoke(arg);
         }
 
-        protected virtual void OnLeave()
+        protected virtual void OnLeave(StateEventArg arg)
         {
-            ExitEvent?.Invoke();
+            ExitEvent?.Invoke(arg);
         }
 
         protected virtual void OnUpdate()
@@ -52,38 +52,38 @@ namespace UML
             UpdateEvent?.Invoke();
         }
 
-        internal virtual void EnterImmediate(EnterEventArg arg)
+        internal virtual void EnterImmediate(StateEventArg arg)
         {
             Container.EnterChild(this, arg);
             OnEnter(arg);
         }
 
-        internal virtual void EnterFromParent(EnterEventArg arg)
+        internal virtual void EnterFromParent(StateEventArg arg)
         {
             OnEnter(arg);
         }
 
-        internal virtual void EnterFromChild(Region r, EnterEventArg arg)
+        internal virtual void EnterFromChild(Region r, StateEventArg arg)
         {
             Container.EnterChild(this, arg);
             OnEnter(arg);
         }
 
-        internal virtual void LeaveImmediate(Region lca)
+        internal virtual void LeaveImmediate(Region lca, StateEventArg arg)
         {
-            OnLeave();
-            Container.LeaveChild(this, lca);
+            OnLeave(arg);
+            Container.LeaveChild(this, lca, arg);
         }
 
-        internal virtual void LeaveFromParent()
+        internal virtual void LeaveFromParent(StateEventArg arg)
         {
-            OnLeave();
+            OnLeave(arg);
         }
 
-        internal void LeaveFromChild(Region lca)
+        internal void LeaveFromChild(Region lca, StateEventArg arg)
         {
-            OnLeave();
-            Container.LeaveChild(this, lca);
+            OnLeave(arg);
+            Container.LeaveChild(this, lca, arg);
         }
 
         internal virtual void Update()
@@ -101,7 +101,7 @@ namespace UML
             DestroyEvent?.Invoke();
         }
 
-        internal virtual bool HandleEvent(string transitionName, EnterEventArg arg)
+        internal virtual bool HandleEvent(string transitionName, StateEventArg arg)
         {
             return false;
         }

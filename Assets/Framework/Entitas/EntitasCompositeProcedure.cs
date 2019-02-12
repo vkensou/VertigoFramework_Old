@@ -18,7 +18,7 @@ public abstract class EntitasCompositeProcedure : CompositeProcedure
     public override ISystemEventRoute EventRoute => m_eventRoute;
     public override StateMachine ProcedureStateMachine => m_stateMachine;
 
-    protected override void OnEnter(EnterEventArg userData)
+    protected override void OnEnter(StateEventArg userData)
     {
         base.OnEnter(userData);
         m_contexts = new Contexts();
@@ -43,7 +43,7 @@ public abstract class EntitasCompositeProcedure : CompositeProcedure
 
     protected virtual StateMachine CreateStateMachine() { return null; }
 
-    protected override void OnLeave()
+    protected override void OnLeave(StateEventArg arg)
     {
         m_eventRoute.Dispose();
         Object.Destroy(m_rootNode.gameObject);
@@ -59,7 +59,7 @@ public abstract class EntitasCompositeProcedure : CompositeProcedure
         }
 #endif
         m_contexts = null;
-        base.OnLeave();
+        base.OnLeave(arg);
     }
 
     protected override void OnUpdate()
