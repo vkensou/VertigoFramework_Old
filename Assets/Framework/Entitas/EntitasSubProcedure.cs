@@ -7,19 +7,18 @@ public abstract class EntitasSubProcedure : SimpleProcedure
     protected Contexts m_contexts;
     protected Transform m_rootNode;
     protected ISystemEventRoute m_eventRoute;
-    protected StateMachine m_stateMachine;
+    protected StateMachine m_procedureStateMachine;
     protected Feature m_systems;
     protected Blackboard m_blackboard;
-    private bool m_paused = false;
 
     public EntitasSubProcedure(string name)
-        : base(name)
+        : base(name, false)
     {
     }
 
     public override ISystemEventRoute EventRoute => m_eventRoute;
 
-    public override UML.StateMachine ProcedureStateMachine => m_stateMachine;
+    public override UML.StateMachine ProcedureStateMachine => m_procedureStateMachine;
 
     public override Blackboard Blackboard => m_blackboard;
 
@@ -28,74 +27,69 @@ public abstract class EntitasSubProcedure : SimpleProcedure
         m_contexts = contexts;
         m_rootNode = rootNode;
         m_eventRoute = eventRoute;
-        m_blackboard = new Blackboard();
     }
 
     protected virtual StateMachine CreateStateMachine() { return null; }
 
-    protected override void OnEnter(UML.StateEventArg userData)
-    {
-        base.OnEnter(userData);
+    protected abstract void CreateSystems(Feature feature);
 
-        m_stateMachine = CreateStateMachine();
+    protected override void EnterProcedure(StateEventArg arg)
+    {
+        m_blackboard = new Blackboard();
+
+        m_procedureStateMachine = CreateStateMachine();
 
         m_systems = new Feature("Systems");
         CreateSystems(m_systems);
-
         m_systems.Initialize();
 
-        if (m_stateMachine != null)
+        if (m_procedureStateMachine != null)
         {
-            m_stateMachine.EnterStateEvent += OnEnterState;
-            m_stateMachine.Start();
+            m_procedureStateMachine.EnterStateEvent += OnEnterState;
+            m_procedureStateMachine.Start();
         }
     }
 
-    protected abstract void CreateSystems(Feature feature);
-
-    protected override void OnLeave(StateEventArg arg)
+    protected virtual void OnEnterState(string state, StateEventArg arg)
     {
-        var p = arg as ProcedurePauseEvent;
-        if (p != null)
-        {
-            m_paused = true;
-            if (p.rootNodeHide)
-                m_rootNode.gameObject.SetActive(false);
-            return;
-        }
+        EventRoute.SendEvent(EventSendType.OneFrame, new SystemSwitchStateEvent { state = state, arg = arg });
+    }
 
+    protected override void LeaveProcedure(StateEventArg arg)
+    {
+        m_procedureStateMachine?.Destroy();
         m_systems.TearDown();
+        EventRoute.Dispose();
+
 #if (!ENTITAS_DISABLE_VISUAL_DEBUGGING && UNITY_EDITOR)
         Object.Destroy(m_systems.gameObject);
 #endif
+
+        m_blackboard = null;
+        m_procedureStateMachine = null;
         m_systems = null;
-        base.OnLeave(arg);
+        m_contexts = null;
+        m_rootNode = null;
+        m_eventRoute = null;
     }
 
     protected override void OnUpdate()
     {
         base.OnUpdate();
-        // call Execute() on all the IExecuteSystems and 
-        // ReactiveSystems that were triggered last frame
+
         m_systems.Execute();
-        // call cleanup() on all the ICleanupSystems
+
         m_systems.Cleanup();
 
         SystemRequireSwitchStateEvent e = null;
-        if (m_stateMachine != null)
+        if (m_procedureStateMachine != null)
             e = EventRoute.TakeEvent<SystemRequireSwitchStateEvent>();
 
-        m_stateMachine?.Update();
+        m_procedureStateMachine?.Update();
 
         EventRoute.RemoveAll();
 
         if (e != null)
-            m_stateMachine.FireEvent(e.transition, e.eventArg);
-    }
-
-    protected virtual void OnEnterState(string state, StateEventArg arg)
-    {
-        Debug.LogFormat("Enter {0}", state);
-        EventRoute.SendEvent(EventSendType.OneFrame, new SystemSwitchStateEvent { state = state, arg = arg });
+            m_procedureStateMachine.FireEvent(e.transition, e.eventArg);
     }
 }

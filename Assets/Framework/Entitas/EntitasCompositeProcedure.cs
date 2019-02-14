@@ -7,7 +7,7 @@ public abstract class EntitasCompositeProcedure : CompositeProcedure
     protected Contexts m_contexts;
     protected Transform m_rootNode;
     protected ISystemEventRoute m_eventRoute;
-    protected StateMachine m_stateMachine;
+    protected StateMachine m_procedureStateMachine;
 
     public EntitasCompositeProcedure(string name)
         : base(name)
@@ -16,39 +16,38 @@ public abstract class EntitasCompositeProcedure : CompositeProcedure
     }
 
     public override ISystemEventRoute EventRoute => m_eventRoute;
-    public override StateMachine ProcedureStateMachine => m_stateMachine;
+    public override StateMachine ProcedureStateMachine => m_procedureStateMachine;
 
-    protected override void OnEnter(StateEventArg userData)
+    protected virtual string GetRootNodeName() { return "EntitasProcedure Root"; }
+    protected virtual StateMachine CreateStateMachine() { return null; }
+
+    protected override void EnterProcedure(StateEventArg userData)
     {
-        base.OnEnter(userData);
         m_contexts = new Contexts();
 
         m_eventRoute = new SystemEventRoute();
 
-        m_stateMachine = CreateStateMachine();
-
         m_rootNode = new GameObject(GetRootNodeName()).transform;
         RootNodeService.RootNode = m_rootNode;
+
+        m_procedureStateMachine = CreateStateMachine();
 
         foreach (var v in Region.Subvertices)
         {
             EntitasSubProcedure p = v as EntitasSubProcedure;
             if (p == null)
                 continue;
-            p.InitialSubProcedure(m_contexts, m_rootNode, m_eventRoute);
+            p.InitialSubProcedure(m_contexts, m_rootNode, EventRoute);
         }
     }
 
-    protected virtual string GetRootNodeName() { return "EntitasProcedure Root"; }
-
-    protected virtual StateMachine CreateStateMachine() { return null; }
-
-    protected override void OnLeave(StateEventArg arg)
+    protected override void LeaveProcedure(StateEventArg arg)
     {
-        m_eventRoute.Dispose();
+        EventRoute.Dispose();
         Object.Destroy(m_rootNode.gameObject);
         m_contexts.game.DestroyAllEntities();
         m_contexts.Reset();
+
 #if (!ENTITAS_DISABLE_VISUAL_DEBUGGING && UNITY_EDITOR)
         var contextObserverBehaviours = Object.FindObjectsOfType<Entitas.VisualDebugging.Unity.ContextObserverBehaviour>();
         var allContexts = m_contexts.allContexts;
@@ -58,8 +57,11 @@ public abstract class EntitasCompositeProcedure : CompositeProcedure
                 Object.Destroy(ob.gameObject);
         }
 #endif
+
+        m_procedureStateMachine = null;
         m_contexts = null;
-        base.OnLeave(arg);
+        m_rootNode = null;
+        m_eventRoute = null;
     }
 
     protected override void OnUpdate()
