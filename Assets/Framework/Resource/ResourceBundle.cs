@@ -73,7 +73,6 @@ public class ResourceBundle : IResourceBundle
             var t = loadTasks[id];
             return t.loadCompleteObservable;
         }
-        bool con = bundle.Contains(id.ToString());
         var request = bundle.LoadAssetAsync(id.ToString());
         var task = new LoadTask()
         {

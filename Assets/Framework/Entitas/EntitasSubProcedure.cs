@@ -10,6 +10,7 @@ public abstract class EntitasSubProcedure : SimpleProcedure
     protected StateMachine m_stateMachine;
     protected Feature m_systems;
     protected Blackboard m_blackboard;
+    private bool m_paused = false;
 
     public EntitasSubProcedure(string name)
         : base(name)
@@ -54,6 +55,15 @@ public abstract class EntitasSubProcedure : SimpleProcedure
 
     protected override void OnLeave(StateEventArg arg)
     {
+        var p = arg as ProcedurePauseEvent;
+        if (p != null)
+        {
+            m_paused = true;
+            if (p.rootNodeHide)
+                m_rootNode.gameObject.SetActive(false);
+            return;
+        }
+
         m_systems.TearDown();
 #if (!ENTITAS_DISABLE_VISUAL_DEBUGGING && UNITY_EDITOR)
         Object.Destroy(m_systems.gameObject);
@@ -75,8 +85,7 @@ public abstract class EntitasSubProcedure : SimpleProcedure
         if (m_stateMachine != null)
             e = EventRoute.TakeEvent<SystemRequireSwitchStateEvent>();
 
-        if (m_stateMachine != null)
-            m_stateMachine.Update();
+        m_stateMachine?.Update();
 
         EventRoute.RemoveAll();
 

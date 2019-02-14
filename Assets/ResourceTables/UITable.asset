@@ -11,5 +11,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce31837287446514fb397a662f2b9643, type: 3}
   m_Name: UITable
   m_EditorClassIdentifier: 
-  names: []
-  objects: []
+  names:
+  - 1
+  objects:
+  - {fileID: 1849648878751796, guid: f6d339790bfeedd40b5310956f9ff2a8, type: 2}

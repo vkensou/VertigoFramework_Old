@@ -18,10 +18,12 @@ public class GameController : MonoBehaviour
 
         var uiRootObj = GameObject.Find("UIRoot");
         DontDestroyOnLoad(uiRootObj);
-        m_uiManager = new UIManager(uiRootObj);
+        m_uiManager = new UIManager();
+        m_uiManager.SetUIRootObj(uiRootObj);
 
         var audioSourceObj = GameObject.Find("SoundSource").GetComponent<AudioSource>();
-        m_soundManager = new SoundManager(audioSourceObj);
+        m_soundManager = new SoundManager();
+        m_soundManager.SetSoundSource(audioSourceObj);
 
         InitialProcedureManager();
 

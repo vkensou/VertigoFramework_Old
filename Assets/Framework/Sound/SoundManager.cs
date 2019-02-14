@@ -7,12 +7,10 @@ public class SoundManager
 {
     public static SoundManager SharedInstance { get; private set; }
 
-    public SoundManager(AudioSource source)
+    public SoundManager()
     {
         Assert.IsNull(SharedInstance);
         SharedInstance = this;
-
-        this.source = source;
     }
 
     private Dictionary<int, AudioClip> clips = new Dictionary<int, AudioClip>();
@@ -41,5 +39,10 @@ public class SoundManager
     {
         if (clips.ContainsKey(id))
             source.PlayOneShot(clips[id]);
+    }
+
+    public void SetSoundSource(AudioSource source)
+    {
+        this.source = source;
     }
 }

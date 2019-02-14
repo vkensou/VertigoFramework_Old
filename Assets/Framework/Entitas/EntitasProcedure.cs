@@ -10,6 +10,9 @@ public abstract class EntitasProcedure : SimpleProcedure
     protected Transform m_rootNode;
     protected ISystemEventRoute m_eventRoute;
     protected UML.StateMachine m_procedureStateMachine;
+    private bool m_paused = false;
+    private bool m_running = false;
+
     public override ISystemEventRoute EventRoute => m_eventRoute;
     public override UML.StateMachine ProcedureStateMachine => m_procedureStateMachine;
 
@@ -20,8 +23,23 @@ public abstract class EntitasProcedure : SimpleProcedure
 
     protected virtual StateMachine CreateStateMachine() { return null; }
 
-    protected override void OnEnter(UML.StateEventArg userData)
+    protected override void OnEnter(StateEventArg arg)
     {
+        base.OnEnter(arg);
+
+        if (m_paused)
+            ResumeProcedure();
+        else
+            EnterProcedure();
+    }
+
+    protected virtual void EnterProcedure()
+    {
+        if (m_running)
+            return;
+        m_running = true;
+        m_paused = false;
+
         m_contexts = new Contexts();
 
         m_eventRoute = new SystemEventRoute();
@@ -32,7 +50,7 @@ public abstract class EntitasProcedure : SimpleProcedure
         CreateSystems(m_systems);
 
         m_rootNode = new GameObject(GetRootNodeName()).transform;
-        //EntityCreateService.SetRootNode(m_rootNode);
+        RootNodeService.RootNode = m_rootNode;
 
         //m_procedureStateMachine.StateEnterEvent += (name) => { m_eventRoute.SendEvent(new SystemSwitchStateEvent { state = name }); };
         m_procedureStateMachine?.Start();
@@ -43,11 +61,37 @@ public abstract class EntitasProcedure : SimpleProcedure
         EventRoute.RemoveEvent<SystemSwitchStateEvent>();
     }
 
+    protected virtual void ResumeProcedure()
+    {
+        if (m_running && m_paused)
+        {
+            m_rootNode.gameObject.SetActive(true);
+            m_paused = false;
+        }
+    }
+
     protected abstract void CreateSystems(Feature feature);
-    protected virtual string GetRootNodeName() { return "EntitasProcedure Root"; }
+    protected virtual string GetRootNodeName() { return string.Format("EntitasProcedure {0} Root", Name); }
 
     protected override void OnLeave(StateEventArg arg)
     {
+        var p = arg as ProcedurePauseEvent;
+        if (p != null)
+            PauseProcedure(p);
+        else
+            LeaveProcedure(arg);
+
+        base.OnLeave(arg);
+    }
+
+    public virtual void LeaveProcedure(StateEventArg arg)
+    {
+        if (!m_running)
+            return;
+
+        m_running = false;
+        m_paused = false;
+
         m_procedureStateMachine = null;
 
         EventRoute.Dispose();
@@ -55,6 +99,14 @@ public abstract class EntitasProcedure : SimpleProcedure
         m_systems.TearDown();
 #if (!ENTITAS_DISABLE_VISUAL_DEBUGGING && UNITY_EDITOR)
         Object.Destroy(m_systems.gameObject);
+
+        var contextObserverBehaviours = Object.FindObjectsOfType<Entitas.VisualDebugging.Unity.ContextObserverBehaviour>();
+        var allContexts = m_contexts.allContexts;
+        foreach (var ob in contextObserverBehaviours)
+        {
+            if (System.Array.IndexOf(allContexts, ob.contextObserver.context) != -1)
+                Object.Destroy(ob.gameObject);
+        }
 #endif
         m_systems = null;
         m_contexts.game.DestroyAllEntities();
@@ -62,8 +114,19 @@ public abstract class EntitasProcedure : SimpleProcedure
         m_contexts = null;
     }
 
+    protected virtual void PauseProcedure(ProcedurePauseEvent arg)
+    {
+        if(m_running && !m_paused)
+        {
+            m_paused = true;
+            if (arg.rootNodeHide)
+                m_rootNode.gameObject.SetActive(false);
+        }
+    }
+
     protected override void OnUpdate()
     {
+        base.OnUpdate();
         // call Execute() on all the IExecuteSystems and 
         // ReactiveSystems that were triggered last frame
         m_systems.Execute();

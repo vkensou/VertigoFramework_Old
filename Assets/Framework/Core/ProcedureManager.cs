@@ -9,7 +9,6 @@ public class ProcedureManager : IProcedureManager
     private int command;
     private string commandEvent;
     private UML.StateEventArg commandArg;
-    private bool commandShutDown;
     private UML.StateMachine procedureStateMachine = new UML.StateMachine();
 
     public SimpleProcedure ActiveProcedure
@@ -54,7 +53,6 @@ public class ProcedureManager : IProcedureManager
         command = 1;
         commandEvent = procedure;
         commandArg = firearg;
-        commandShutDown = true;
     }
 
     public override void PushCommand(string procedure, UML.StateEventArg firearg, bool shutdown)
@@ -67,7 +65,6 @@ public class ProcedureManager : IProcedureManager
         command = 1;
         commandEvent = procedure;
         commandArg = firearg;
-        commandShutDown = shutdown;
     }
 
     public override void Update()

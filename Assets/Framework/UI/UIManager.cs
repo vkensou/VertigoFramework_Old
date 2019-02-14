@@ -31,11 +31,14 @@ public class UIManager
     }
     private Dictionary<int, UIItem> singleteonUIInstance = new Dictionary<int, UIItem>();
 
-    public UIManager(GameObject uiRootObj)
+    public UIManager()
     {
         Assert.IsNull(SharedInstance);
         SharedInstance = this;
+    }
 
+    public void SetUIRootObj(GameObject uiRootObj)
+    {
         this.uiRootObj = uiRootObj;
     }
 
