@@ -19,7 +19,7 @@ public class ProcedureManager : IProcedureManager
         }
     }
 
-    static public ISystemEventRoute ActiveEventRoute { get { return SharedInstance.ActiveProcedure.EventRoute; } }
+    static public IEventRoute ActiveEventRoute { get { return SharedInstance.ActiveProcedure.EventRoute; } }
 
     public ProcedureManager()
     {

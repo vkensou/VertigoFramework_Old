@@ -10,7 +10,11 @@ public class HelloProcedure : SimpleProcedure
 
     }
 
-    public override ISystemEventRoute EventRoute => null;
+    protected override void EnterProcedure(StateEventArg arg)
+    {
+        Debug.Log("Hello");
+    }
+    public override IEventRoute EventRoute => null;
 
     public override StateMachine ProcedureStateMachine => null;
 

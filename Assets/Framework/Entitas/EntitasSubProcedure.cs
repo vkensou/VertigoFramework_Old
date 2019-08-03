@@ -6,7 +6,7 @@ public abstract class EntitasSubProcedure : SimpleProcedure
 {
     protected Contexts m_contexts;
     protected Transform m_rootNode;
-    protected ISystemEventRoute m_eventRoute;
+    protected IEventRoute m_eventRoute;
     protected StateMachine m_procedureStateMachine;
     protected Feature m_systems;
     protected Blackboard m_blackboard;
@@ -16,13 +16,13 @@ public abstract class EntitasSubProcedure : SimpleProcedure
     {
     }
 
-    public override ISystemEventRoute EventRoute => m_eventRoute;
+    public override IEventRoute EventRoute => m_eventRoute;
 
     public override UML.StateMachine ProcedureStateMachine => m_procedureStateMachine;
 
     public override Blackboard Blackboard => m_blackboard;
 
-    public void InitialSubProcedure(Contexts contexts, Transform rootNode, ISystemEventRoute eventRoute)
+    public void InitialSubProcedure(Contexts contexts, Transform rootNode, IEventRoute eventRoute)
     {
         m_contexts = contexts;
         m_rootNode = rootNode;
@@ -87,7 +87,7 @@ public abstract class EntitasSubProcedure : SimpleProcedure
 
         m_procedureStateMachine?.Update();
 
-        EventRoute.RemoveAll();
+        EventRoute.ClearOutOfDateEvents();
 
         if (e != null)
             m_procedureStateMachine.FireEvent(e.transition, e.eventArg);

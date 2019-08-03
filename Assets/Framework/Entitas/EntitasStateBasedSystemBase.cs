@@ -2,18 +2,31 @@
 using System.Collections;
 using Entitas;
 
-public abstract class EntitasStateBasedSystemBase : StateBasedSystemBase, IExecuteSystem
+public abstract class EntitasStateBasedSystemBase : StateBasedSystemBase, IInitializeSystem, IExecuteSystem, ITearDownSystem
 {
-    public EntitasStateBasedSystemBase(ISystemEventRoute eventRoute)
-        : base(eventRoute)
-    {
+    EntitasSystemEnvironment systemEnvironment;
+    protected GameContext Context => systemEnvironment.Context;
 
+    public EntitasStateBasedSystemBase(EntitasSystemEnvironment parameters)
+        : base(parameters)
+    {
+        systemEnvironment = parameters;
+    }
+
+    public virtual void Initialize()
+    {
+        throw new System.NotImplementedException();
     }
 
     public virtual void Execute()
     {
         HandleStateEvents();
         UpdateState();
+    }
+
+    public void TearDown()
+    {
+        Shutdown();
     }
 
     protected sealed override void HandleStateEvents()
@@ -29,7 +42,7 @@ public abstract class EntitasStateBasedSystemBase : StateBasedSystemBase, IExecu
 
     protected abstract class EntitasSystemState : ISystemState
     {
-        public EntitasSystemState(ISystemEventRoute eventRoute)
+        public EntitasSystemState(IEventRoute eventRoute)
             : base(eventRoute)
         {
 

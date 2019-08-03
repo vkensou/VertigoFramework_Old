@@ -8,11 +8,12 @@ public abstract class EntitasProcedure : SimpleProcedure
     protected Feature m_systems;
     protected Contexts m_contexts;
     protected Transform m_rootNode;
-    protected ISystemEventRoute m_eventRoute;
+    protected IEventRoute m_eventRoute;
     protected UML.StateMachine m_procedureStateMachine;
     protected Blackboard m_blackboard;
+    protected Schedulable m_schedulable;
 
-    public override ISystemEventRoute EventRoute => m_eventRoute;
+    public override IEventRoute EventRoute => m_eventRoute;
     public override UML.StateMachine ProcedureStateMachine => m_procedureStateMachine;
     public override Blackboard Blackboard => base.Blackboard;
 
@@ -22,14 +23,14 @@ public abstract class EntitasProcedure : SimpleProcedure
     }
 
     protected virtual StateMachine CreateStateMachine() { return null; }
-    protected abstract void CreateSystems(Feature feature);
+    protected abstract void CreateSystems(Feature feature, EntitasSystemEnvironment parameters);
     protected virtual string GetRootNodeName() { return string.Format("EntitasProcedure {0} Root", Name); }
 
     protected override void EnterProcedure(StateEventArg arg)
     {
         m_contexts = new Contexts();
 
-        m_eventRoute = new SystemEventRoute();
+        m_eventRoute = new EntitasEventRoute(m_contexts);
 
         m_rootNode = new GameObject(GetRootNodeName()).transform;
         RootNodeService.RootNode = m_rootNode;
@@ -38,8 +39,11 @@ public abstract class EntitasProcedure : SimpleProcedure
 
         m_procedureStateMachine = CreateStateMachine();
 
+        m_schedulable = new Schedulable();
+
         m_systems = new Feature("Systems");
-        CreateSystems(m_systems);
+        EntitasSystemEnvironment parameters = new EntitasSystemEnvironment(m_contexts.game, EventRoute, Blackboard, ProcedureStateMachine, m_schedulable);
+        CreateSystems(m_systems, parameters);
         m_systems.Initialize();
 
         if (m_procedureStateMachine != null)
@@ -92,15 +96,15 @@ public abstract class EntitasProcedure : SimpleProcedure
         m_contexts = null;
         m_rootNode = null;
         m_eventRoute = null;
+        m_schedulable = null;
     }
 
     protected override void OnUpdate()
     {
         base.OnUpdate();
 
+        m_schedulable.ProcessSchedule(Time.deltaTime);
         m_systems.Execute();
-
-        m_systems.Cleanup();
 
         SystemRequireSwitchStateEvent e = null;
         if (m_procedureStateMachine != null)
@@ -108,7 +112,7 @@ public abstract class EntitasProcedure : SimpleProcedure
 
         m_procedureStateMachine?.Update();
 
-        EventRoute.RemoveAll();
+        EventRoute.ClearOutOfDateEvents();
 
         if (e != null)
             m_procedureStateMachine.FireEvent(e.transition, e.eventArg);

@@ -3,6 +3,6 @@ using System.Collections;
 
 public interface IProcedure
 {
-    ISystemEventRoute EventRoute { get; }
+    IEventRoute EventRoute { get; }
     UML.StateMachine ProcedureStateMachine { get; }
 }

@@ -1,12 +1,11 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using UML;
 
 public abstract class StateBasedSystemBase : SystemBase
 {
     protected ISystemState currentState;
 
-    public StateBasedSystemBase(ISystemEventRoute eventRoute)
-        :base(eventRoute)
+    public StateBasedSystemBase(SystemEnvironment systemEnvironment)
+        :base(systemEnvironment)
     {
     }
 
@@ -31,13 +30,13 @@ public abstract class StateBasedSystemBase : SystemBase
 
     protected abstract class ISystemState
     {
-        protected ISystemEventRoute EventRoute { get; set; }
-        public ISystemState(ISystemEventRoute eventRoute)
+        protected IEventRoute EventRoute { get; set; }
+        public ISystemState(IEventRoute eventRoute)
         {
             EventRoute = eventRoute;
         }
 
-        public virtual void Enter(UML.StateEventArg arg) { }
+        public virtual void Enter(StateEventArg arg) { }
         public virtual void Update() { }
         public virtual void Leave() { }
 
@@ -61,6 +60,6 @@ public abstract class StateBasedSystemBase : SystemBase
             return EventRoute.TryTakeEvent<E>(out _event);
         }
 
-        protected abstract void RequireSwitchState(string transition, UML.StateEventArg arg = null);
+        protected abstract void RequireSwitchState(string transition, StateEventArg arg = null);
     }
 }

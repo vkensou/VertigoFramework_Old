@@ -13,7 +13,7 @@ public abstract class SimpleProcedure : UML.State, IProcedure
     {
         this.suspendable = suspendable;
     }
-    public virtual ISystemEventRoute EventRoute { get; }
+    public virtual IEventRoute EventRoute { get; }
     public virtual UML.StateMachine ProcedureStateMachine { get; }
     public virtual Blackboard Blackboard { get; }
 

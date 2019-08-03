@@ -6,7 +6,7 @@ public abstract class EntitasCompositeProcedure : CompositeProcedure
 {
     protected Contexts m_contexts;
     protected Transform m_rootNode;
-    protected ISystemEventRoute m_eventRoute;
+    protected IEventRoute m_eventRoute;
     protected StateMachine m_procedureStateMachine;
 
     public EntitasCompositeProcedure(string name)
@@ -15,7 +15,7 @@ public abstract class EntitasCompositeProcedure : CompositeProcedure
 
     }
 
-    public override ISystemEventRoute EventRoute => m_eventRoute;
+    public override IEventRoute EventRoute => m_eventRoute;
     public override StateMachine ProcedureStateMachine => m_procedureStateMachine;
 
     protected virtual string GetRootNodeName() { return "EntitasProcedure Root"; }
@@ -25,7 +25,7 @@ public abstract class EntitasCompositeProcedure : CompositeProcedure
     {
         m_contexts = new Contexts();
 
-        m_eventRoute = new SystemEventRoute();
+        m_eventRoute = new EntitasEventRoute(m_contexts);
 
         m_rootNode = new GameObject(GetRootNodeName()).transform;
         RootNodeService.RootNode = m_rootNode;

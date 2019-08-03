@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using UniRx;
+using UnityEngine.Assertions;
 
 public class ResourceBundleManager
 {
@@ -11,6 +12,7 @@ public class ResourceBundleManager
 
     public ResourceBundleManager(bool isEditor)
     {
+        Assert.IsNull(SharedInstance);
         SharedInstance = this;
 
 #if UNITY_EDITOR

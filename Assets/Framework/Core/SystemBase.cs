@@ -1,38 +1,40 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using UML;
 
 public abstract class SystemBase
 {
-    protected readonly ISystemEventRoute m_eventRoute;
-    protected readonly Schedulable schedulable = new Schedulable();
+    SystemEnvironment SystemEnvironment { get; }
+    protected IEventRoute EventRoute => SystemEnvironment.EventRoute;
+    protected Blackboard Blackboard => SystemEnvironment.Blackboard;
+    protected StateMachine StateMachine => SystemEnvironment.StateMachine;
+    protected Schedulable Schedulable => SystemEnvironment.Schedulable;
 
-    public SystemBase(ISystemEventRoute eventRoute)
+    public SystemBase(SystemEnvironment systemEnvironment)
     {
-        m_eventRoute = eventRoute;
+        this.SystemEnvironment = systemEnvironment;
     }
 
     protected void SendEvent<E>(EventSendType sendType, E _event) where E : ISystemEvent
     {
-        m_eventRoute.SendEvent(sendType, _event);
+        EventRoute.SendEvent(sendType, _event);
     }
 
     protected bool CheckEvent<E>() where E : ISystemEvent
     {
-        return m_eventRoute.CheckEvent<E>();
+        return EventRoute.CheckEvent<E>();
     }
 
     protected E TakeEvent<E>() where E : ISystemEvent
     {
-        return m_eventRoute.TakeEvent<E>();
+        return EventRoute.TakeEvent<E>();
     }
 
     protected bool TryTakeEvent<E>(out E _event) where E : ISystemEvent
     {
-        return m_eventRoute.TryTakeEvent<E>(out _event);
+        return EventRoute.TryTakeEvent<E>(out _event);
     }
 
-    protected void ProcessSchedule()
+    protected void SendEntityEvent<E>(int entityId, EventSendType sendType, E _event) where E : IEntityEvent
     {
-        schedulable.ProcessSchedule(Time.deltaTime);
+        EventRoute.SendEntityEvent<E>(entityId, sendType, _event);
     }
 }

@@ -10,7 +10,7 @@ public abstract class CompositeProcedure : CompositeState, IProcedure
         CreateRegion(name + "_Region");
     }
 
-    public abstract ISystemEventRoute EventRoute { get; }
+    public abstract IEventRoute EventRoute { get; }
     public abstract UML.StateMachine ProcedureStateMachine { get; }
 
     protected override void OnEnter(StateEventArg arg)
