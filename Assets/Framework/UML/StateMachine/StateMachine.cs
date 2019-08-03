@@ -94,7 +94,7 @@ namespace UML
                 region.Value.Initialize();
         }
 
-        public void Destory()
+        public void Destroy()
         {
             foreach (var region in regions)
                 region.Value.Leave(null);
