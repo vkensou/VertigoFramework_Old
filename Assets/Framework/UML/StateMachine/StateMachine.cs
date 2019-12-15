@@ -16,6 +16,7 @@ namespace UML
         public event Action<string> LeaveStateEvent;
         public bool IsFinal { get; private set; } = false;
         public bool IsTerminate { get; private set; }
+        public bool IsStarted { get; private set; } = false;
 
         public Region Region => firstRegion;
         public Region CreateRegion(string name)
@@ -31,6 +32,7 @@ namespace UML
 
         public StateMachine AddTransition(string name, State source, State target, Func<bool> guard = null, Action effect = null, TransitionKind kind = TransitionKind.External)
         {
+            Assert.AreNotEqual(name, "__Start");
             Assert.IsTrue(!(source is FinalState));
 
             Region lca = LCA(source, target);
@@ -65,8 +67,10 @@ namespace UML
 
         public void Start()
         {
+            Assert.AreEqual(false, IsStarted);
             Assert.AreNotEqual(regions.Count, 0);
 
+            IsStarted = true;
             foreach(var region in regions)
             {
                 region.Value.Enter(null);
@@ -75,11 +79,14 @@ namespace UML
 
         public void FireEvent(string transitionName, StateEventArg arg = null)
         {
-            foreach (var region in regions)
-            {
-                if (region.Value.HandleEvent(transitionName, arg))
-                    break;
-            }
+            if (transitionName == "__Start")
+                Start();
+            else
+                foreach (var region in regions)
+                {
+                    if (region.Value.HandleEvent(transitionName, arg))
+                        break;
+                }
         }
 
         public void Update()

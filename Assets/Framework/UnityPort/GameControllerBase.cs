@@ -16,6 +16,10 @@ public abstract class GameControllerBase : MonoBehaviour
     {
         m_bundleManager = new ResourceBundleManager(isEditor);
 
+        new TextureManager();
+        new MaterialManager();
+        new PrefabManager();
+
         var uiRootObj = GameObject.Find("UIRoot");
         DontDestroyOnLoad(uiRootObj);
         m_uiManager = new UIManager();
@@ -24,8 +28,6 @@ public abstract class GameControllerBase : MonoBehaviour
         var audioSourceObj = GameObject.Find("SoundSource").GetComponent<AudioSource>();
         m_soundManager = new SoundManager();
         m_soundManager.SetSoundSource(audioSourceObj);
-
-        new PrefabManager();
 
         m_procedureManager = InitialProcedureManager();
 

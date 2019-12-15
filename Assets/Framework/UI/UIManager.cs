@@ -16,12 +16,9 @@ public class UIPanel
     }
 }
 
-public class UIManager
+public class UIManager : AssetManager<UIManager, GameObject>
 {
-    public static UIManager SharedInstance { get; private set; }
-
     private GameObject uiRootObj;
-    private Dictionary<int, GameObject> uiPrefabs = new Dictionary<int, GameObject>();
     private class UIItem
     {
         public int id;
@@ -30,12 +27,6 @@ public class UIManager
         public bool released;
     }
     private Dictionary<int, UIItem> singleteonUIInstance = new Dictionary<int, UIItem>();
-
-    public UIManager()
-    {
-        Assert.IsNull(SharedInstance);
-        SharedInstance = this;
-    }
 
     public void SetUIRootObj(GameObject uiRootObj)
     {
@@ -54,9 +45,9 @@ public class UIManager
             }
             return item.panel;
         }
-        else if (uiPrefabs.ContainsKey(id))
+        else if (assets.ContainsKey(id))
         {
-            var obj = Object.Instantiate(uiPrefabs[id], uiRootObj.transform);
+            var obj = Object.Instantiate(assets[id], uiRootObj.transform);
             var panel = new UIPanel(id, obj);
             var item = new UIItem() { id = id, panel = panel, recycled = recycled };
             singleteonUIInstance.Add(id, item);
@@ -81,16 +72,5 @@ public class UIManager
                 singleteonUIInstance.Remove(panel.id);
             }
         }
-    }
-
-    public System.IObservable<LoadAssetResult> LoadUIPrefab(int id)
-    {
-        var obb = ResourceBundleManager.SharedInstance.LoadAsset(id);
-        obb.Subscribe(result =>
-        {
-            if (result.asset is GameObject && !uiPrefabs.ContainsKey(result.id))
-                uiPrefabs.Add(result.id, result.asset as GameObject);
-        });
-        return obb;
     }
 }

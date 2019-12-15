@@ -81,9 +81,9 @@ public abstract class EntitasSubProcedure : SimpleProcedure
 
         m_systems.Cleanup();
 
-        SystemRequireSwitchStateEvent e = null;
+        SystemStateTransitionEvent e = null;
         if (m_procedureStateMachine != null)
-            e = EventRoute.TakeEvent<SystemRequireSwitchStateEvent>();
+            e = EventRoute.TakeEvent<SystemStateTransitionEvent>();
 
         m_procedureStateMachine?.Update();
 

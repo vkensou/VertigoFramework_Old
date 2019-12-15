@@ -30,10 +30,10 @@ public abstract class StateBasedSystemBase : SystemBase
 
     protected abstract class ISystemState
     {
-        protected IEventRoute EventRoute { get; set; }
-        public ISystemState(IEventRoute eventRoute)
+        protected EntitasSystemEnvironment SystemEnvironment { get; set; }
+        public ISystemState(EntitasSystemEnvironment systemEnvironment)
         {
-            EventRoute = eventRoute;
+            SystemEnvironment = systemEnvironment;
         }
 
         public virtual void Enter(StateEventArg arg) { }
@@ -42,24 +42,27 @@ public abstract class StateBasedSystemBase : SystemBase
 
         protected void SendEvent<E>(EventSendType sendType, E _event) where E : ISystemEvent
         {
-            EventRoute.SendEvent(sendType, _event);
+            SystemEnvironment.EventRoute.SendEvent(sendType, _event);
         }
 
         protected bool CheckEvent<E>() where E : ISystemEvent
         {
-            return EventRoute.CheckEvent<E>();
+            return SystemEnvironment.EventRoute.CheckEvent<E>();
         }
 
         protected E TakeEvent<E>() where E : ISystemEvent
         {
-            return EventRoute.TakeEvent<E>();
+            return SystemEnvironment.EventRoute.TakeEvent<E>();
         }
 
         protected bool TryTakeEvent<E>(out E _event) where E : ISystemEvent
         {
-            return EventRoute.TryTakeEvent<E>(out _event);
+            return SystemEnvironment.EventRoute.TryTakeEvent<E>(out _event);
         }
 
-        protected abstract void RequireSwitchState(string transition, StateEventArg arg = null);
+        protected void RequireSwitchState(string transition, StateEventArg arg = null)
+        {
+            SystemEnvironment.StateMachine.FireEvent(transition, arg);
+        }
     }
 }

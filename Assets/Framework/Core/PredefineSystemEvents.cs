@@ -7,7 +7,7 @@ public class SystemSwitchStateEvent : ISystemEvent
     public StateEventArg arg;
 }
 
-public class SystemRequireSwitchStateEvent : ISystemEvent
+public class SystemStateTransitionEvent : ISystemEvent
 {
     public string transition;
     public StateEventArg eventArg;

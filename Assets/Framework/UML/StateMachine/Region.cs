@@ -5,6 +5,8 @@ using UnityEngine;
 
 namespace UML
 {
+    using TransitionList = Dictionary<Vertex, Transition>;
+
     public class Region
     {
         public string Name { get; }
@@ -14,7 +16,7 @@ namespace UML
         private State rootActive;
         private State active;
         List<Vertex> subvertices = new List<Vertex>();
-        Dictionary<string, Transition> transitions = new Dictionary<string, Transition>();
+        Dictionary<string, TransitionList> transitions = new Dictionary<string, TransitionList>();
         List<Transition> autoTransitions = new List<Transition>();
         public event Action FinalEvent;
         public event Action TerminateEvent;
@@ -72,7 +74,13 @@ namespace UML
 
         internal void AddTransitionImpl(string name, Transition t)
         {
-            transitions.Add(name, t);
+            TransitionList list;
+            if (!transitions.TryGetValue(name, out list))
+            {
+                list = new TransitionList();
+                transitions.Add(name, list);
+            }
+            list.Add(t.Source, t);
         }
 
         internal void AddAutoTransitionImpl(Transition t)
@@ -163,12 +171,18 @@ namespace UML
 
         public bool HandleEvent(string transitionName, StateEventArg arg)
         {
+            TransitionList list;
             Transition t;
-            if (!transitions.TryGetValue(transitionName, out t))
+            if (!transitions.TryGetValue(transitionName, out list))
             {
                 if (rootActive != null && rootActive.HandleEvent(transitionName, arg))
                     return true;
                 return false;
+            }
+            else
+            {
+                if (!list.TryGetValue(active, out t))
+                    return false;
             }
 
             if (t.RootSource != rootActive)

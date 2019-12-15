@@ -7,7 +7,6 @@ public abstract class CompositeProcedure : CompositeState, IProcedure
     public CompositeProcedure(string name)
         :base(name)
     {
-        CreateRegion(name + "_Region");
     }
 
     public abstract IEventRoute EventRoute { get; }

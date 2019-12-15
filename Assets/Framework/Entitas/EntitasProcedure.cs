@@ -46,10 +46,10 @@ public abstract class EntitasProcedure : SimpleProcedure
         CreateSystems(m_systems, parameters);
         m_systems.Initialize();
 
-        if (m_procedureStateMachine != null)
+        if (ProcedureStateMachine != null)
         {
-            m_procedureStateMachine.EnterStateEvent += OnEnterState;
-            m_procedureStateMachine.Start();
+            ProcedureStateMachine.EnterStateEvent += OnEnterState;
+            RequireStateTransitionDelay("__Start");
         }
     }
 
@@ -71,7 +71,7 @@ public abstract class EntitasProcedure : SimpleProcedure
 
     protected override void LeaveProcedure(StateEventArg arg)
     {
-        m_procedureStateMachine?.Destroy();
+        ProcedureStateMachine?.Destroy();
         m_systems.TearDown();
         EventRoute.Dispose();
         m_contexts.game.DestroyAllEntities();
@@ -106,15 +106,14 @@ public abstract class EntitasProcedure : SimpleProcedure
         m_schedulable.ProcessSchedule(Time.deltaTime);
         m_systems.Execute();
 
-        SystemRequireSwitchStateEvent e = null;
-        if (m_procedureStateMachine != null)
-            e = EventRoute.TakeEvent<SystemRequireSwitchStateEvent>();
-
-        m_procedureStateMachine?.Update();
+        SystemStateTransitionEvent e = null;
+        if (ProcedureStateMachine != null)
+            e = EventRoute.TakeEvent<SystemStateTransitionEvent>();
 
         EventRoute.ClearOutOfDateEvents();
 
         if (e != null)
-            m_procedureStateMachine.FireEvent(e.transition, e.eventArg);
+            ProcedureStateMachine.FireEvent(e.transition, e.eventArg);
+        ProcedureStateMachine?.Update();
     }
 }

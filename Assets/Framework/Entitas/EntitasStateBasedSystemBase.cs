@@ -42,16 +42,10 @@ public abstract class EntitasStateBasedSystemBase : StateBasedSystemBase, IIniti
 
     protected abstract class EntitasSystemState : ISystemState
     {
-        public EntitasSystemState(IEventRoute eventRoute)
-            : base(eventRoute)
+        public EntitasSystemState(EntitasSystemEnvironment systemEnvironment)
+            : base(systemEnvironment)
         {
 
-        }
-
-        protected override void RequireSwitchState(string transition, UML.StateEventArg arg = null)
-        {
-            var e = new SystemRequireSwitchStateEvent{ transition = transition, eventArg = arg };
-            EventRoute.SendEvent(EventSendType.OneTime, e);
         }
     }
 }

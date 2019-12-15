@@ -78,4 +78,18 @@ public abstract class SimpleProcedure : UML.State, IProcedure
     {
         OnLeaveProcedure(null);
     }
+
+    protected void RequireStateTransition(string transition, StateEventArg arg = null)
+    {
+        ProcedureStateMachine.FireEvent(transition, arg);
+    }
+
+    protected void RequireStateTransitionDelay(string transition, StateEventArg arg = null)
+    {
+        EventRoute.SendEvent(EventSendType.OneTime, new SystemStateTransitionEvent()
+        {
+            transition = transition,
+            eventArg = arg
+        });
+    }
 }
